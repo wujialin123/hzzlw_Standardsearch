@@ -33,7 +33,7 @@ con <- dbConnect(MySQL(),
                  user="****",               # 数据库的用户名
                  password="*****")          # 数据库的密码
 dbSendQuery(con,'SET NAMES gbk')            # 设定gbk编码，不然中文会乱码
- # 从数据库中选取id,chinese_title,english_title,release_date
+# 从数据库中选取id,chinese_title,english_title,release_date
 data <- dbGetQuery(con,"SELECT id,chinese_title,english_title,release_date FROM nqi_std")                             
 nqi_std <- data.table(data)                 # 将数据类型转换为data.table格式
 ```
