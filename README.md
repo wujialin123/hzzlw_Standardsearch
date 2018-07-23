@@ -1,6 +1,5 @@
 # 一个简易的智能搜索引擎
-  在公司工作的过程中,我构建了一个简易的智能搜索系统，例如搜索番茄的同时也进行了西红柿的查询，也就是简易的联想搜索,具体功能可以进入这个网址进行查看[http://www.hzzlfw.cn/index.php?s=/Home/Standard/staquery/search](http://www.hzzlfw.cn/index.php?s=/Home/Standard/staquery/search)。主要是通过R语言和Python进行实现的。
-接下来我会逐步介绍如何实现这个搜索系统。
+&nbsp;&nbsp;&nbsp;&nbsp;在公司工作的过程中,我构建了一个简易的智能搜索系统,具体功能可以进入这个网址进行查看[http://www.hzzlfw.cn/index.php?s=/Home/Standard/staquery/search](http://www.hzzlfw.cn/index.php?s=/Home/Standard/staquery/search) 主要是通过R语言和Python进行实现的。接下来我会逐步介绍如何实现这个搜索系统。
 
 ## 1. 数据存储结构和形式
 杭州质量网的标准查询数据存在我们服务器上，以下是我所使用到的数据案例，对于标准查询，领导交给我们的要求是标题匹配，这里我就没有取出正文进行计算。release_date这个变量是为了进行时间加权，领导表示不想看到几十年前的标准。
@@ -19,6 +18,7 @@ id|chinese_title|english_title|release_date
 659406|集成电路倒装焊试验方法|Test methods for flip chip integrated circuits|2018/3/15
 
 ## 2. 如何计算定义搜索相关度
+我们首先得
 ```R
 # 环境清除及工作路径搭建
 rm(list = ls())
