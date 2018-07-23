@@ -1,5 +1,5 @@
 # 一个简易的智能搜索引擎
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在公司工作的过程中,我构建了一个简易的智能搜索系统,具体功能可以进入这个网址进行查看[杭州质量服务网](http://www.hzzlfw.cn/index.php?s=/Home/Standard/staquery/search) 主要是通过R语言和Python进行实现的。接下来我会逐步介绍如何实现这个搜索系统。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在公司工作的过程中,我构建了一个简易的智能搜索系统,具体功能可以进入[杭州质量服务网](http://www.hzzlfw.cn/index.php?s=/Home/Standard/staquery/search)进行查看，这个流程主要是通过R语言和Python进行实现的。接下来我会逐步介绍如何实现这个搜索系统。
 
 ## 1. 数据存储结构和形式
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;杭州质量网的标准查询数据存在我们服务器上，以下是我所使用到的数据案例，对于标准查询，领导交给我们的要求是标题匹配，这里我就没有取出正文进行计算。release_date这个变量是为了进行时间加权，领导表示不想看到几十年前的标准。
