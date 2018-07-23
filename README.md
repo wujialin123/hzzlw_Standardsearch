@@ -18,10 +18,22 @@ id|chinese_title|english_title|release_date
 659406|集成电路倒装焊试验方法|Test methods for flip chip integrated circuits|2018/3/15
 
 ## 2. 如何计算定义搜索相关度
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;我们首先得
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;搜索引擎以前最常用的一个数学模型就是[TF_IDF](https://baike.baidu.com/item/tf-idf/8816134?fr=aladdin),我这里也是套用了这个模型。不过由于领导们的小需求--hh领导要求我们搜索番茄的同时要搜索西红柿，也就是实现同义搜索，也可以说是联想搜素。因此我将用户的输入先进行一个关键词的联想，具体的实现手段放在后面讲解，这部分我先介绍最简单的TF_IDF值的计算，由于这部分内容是刚毕业的时候做的。当时只会R不会python的优化，对几千万篇文章进行处理我的代码运行效率实在太低，所以果断放弃了python。
+
+### 2.1 从数据库中导入数据
+
 ```R
 # 环境清除及工作路径搭建
-rm(list = ls())
-memory.limit(103430)
-setwd("D:/www/ElasticSearch/fencimoxing")
+library(RMySQL)
+library(data.table)
+con <- dbConnect(MySQL(),
+                 host='**.***.**.**',       # ip地址
+                 port=****,                 # 端口号
+                 dbname="********",         # 数据库名字
+                 user="****",               # 数据库的用户名
+                 password="*****")          # 数据库的密码
+dbSendQuery(con,'SET NAMES gbk')            # 设定gbk编码，不然中文会乱码
+ # 从数据库中选取id,chinese_title,english_title,release_date
+data <- dbGetQuery(con,"SELECT id,chinese_title,english_title,release_date FROM nqi_std")                             
+nqi_std <- data.table(data)                 # 将数据类型转换为data.table格式
 ```
