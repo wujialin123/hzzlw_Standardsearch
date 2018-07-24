@@ -22,10 +22,9 @@ id|chinese_title|english_title|release_date
 
 ### 2.1 从数据库中导入数据
 
-```R
+```{r}
 # 环境清除及工作路径搭建
-library(RMySQL)
-library(data.table)
+library(RMySQL)                             # 数据库操作的一个包
 con <- dbConnect(MySQL(),
                  host='**.***.**.**',       # ip地址
                  port=****,                 # 端口号
@@ -34,6 +33,7 @@ con <- dbConnect(MySQL(),
                  password="*****")          # 数据库的密码
 dbSendQuery(con,'SET NAMES gbk')            # 设定gbk编码，不然中文会乱码
 # 从数据库中选取id,chinese_title,english_title,release_date
-data <- dbGetQuery(con,"SELECT id,chinese_title,english_title,release_date FROM nqi_std")                             
-nqi_std <- data.table(data)                 # 将数据类型转换为data.table格式
+data <- dbGetQuery(con,"SELECT id,chinese_title,english_title,release_date FROM nqi_std")  
 ```
+
+
