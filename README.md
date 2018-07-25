@@ -23,7 +23,8 @@ id|chinese_title|english_title|release_date
 ### 2.1 从数据库中导入数据
 
 ```{r}
-# 环境清除及工作路径搭建
+rm(list = ls())                             # 清洗变量空间
+setwd("D:/www/ElasticSearch/fencimoxing")   # 设定工作路径
 library(RMySQL)                             # 数据库操作的一个包
 con <- dbConnect(MySQL(),
                  host='**.***.**.**',       # ip地址
@@ -31,9 +32,10 @@ con <- dbConnect(MySQL(),
                  dbname="********",         # 数据库名字
                  user="****",               # 数据库的用户名
                  password="*****")          # 数据库的密码
-dbSendQuery(con,'SET NAMES gbk')            # 设定gbk编码，不然中文会乱码
+dbSendQuery(con, 'SET NAMES gbk')            # 设定gbk编码，不然中文会乱码
 # 从数据库中选取id,chinese_title,english_title,release_date
-data <- dbGetQuery(con,"SELECT id,chinese_title,english_title,release_date FROM nqi_std")  
+nqi_std <- dbGetQuery(con, "SELECT id, chinese_title, english_title, release_date FROM nqi_std") 
 ```
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 当数据读入到我们的变量空间的时候我们要考虑2件事情一个是时间变量的处理，还有一个是文本的分词。时间变量的处理我打算是直接对数据进行个转换，将其变成一个\[1-2\]的数，距离现在越近数值越大。
 
 
