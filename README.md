@@ -34,7 +34,9 @@ con <- dbConnect(MySQL(),
                  password="*****")          # 数据库的密码
 dbSendQuery(con, 'SET NAMES gbk')           # 设定gbk编码，不然中文会乱码
 # 从数据库中选取id,chinese_title,english_title,release_date
-nqi_std <- dbGetQuery(con, "SELECT id, chinese_title, english_title, release_date FROM nqi_std") 
+data <- dbGetQuery(con, "SELECT id, chinese_title, english_title, release_date FROM nqi_std") 
+data$text <- paste(data$chinese_title, data$english_title)
+
 ```
 
 ### 2.2 日期转数值
@@ -42,6 +44,8 @@ nqi_std <- dbGetQuery(con, "SELECT id, chinese_title, english_title, release_dat
 ```{r}
 library(data.table)                         # 导入data.table包 R语言多线程数据清洗包
 nqi_std <- data.table(data)                 # 转换为data.table
+# 删除"chinese_title", "english_title"2列
+nqi_std <- nqi_std[, c("chinese_title", "english_title") := NULL] 
 # 提取日期数据并进行升序排序，缺失值和日期较小的值会默认在前面sort函数是这样子的
 release_date <- sort(unique(nqi_std[, release_date]))
 # seq(...)这里是产生了等间隔的数值，分布为1-2
@@ -53,8 +57,23 @@ nqi_std <- merge(nqi_std, date_to_num)      # 主键相同的表才可以合并
 nqi_std <- nqi_std[, release_date := NULL]  # 日期数据已经没用了可以直接去除
 # 由于r语言cbind后产生的是是矩阵，要求的数据类型为一样，故dateweight变成了一堆字符串，这里需要进行转换
 nqi_std <- nqi_std[, dateweight := as.numeric(nqi_std[, dateweight])]
+
 ```
 ### 2.3 定义一个分词器
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于某某领导的病态要求：我们这个一定要好好弄像什么凡尔滨对虾啊，秋叶葵啊，这些正常人都不知道的名词也要好好地给我分词分出来。没办法啊，我们只能去把整个搜狗细胞词库拉下来，然后整理了接近5000万条的词库。包含了“腓骨钢板钛合金”，“肺吸虫抗体检测试剂”等等这样的词语，终于基本满足了领导的病态需求。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于某某领导的病态要求：我们这个一定要好好弄像什么凡尔滨对虾啊，秋叶葵啊，这些正常人都不知道的名词也要好好地给我分词分出来。没办法啊，我们只能去把整个搜狗细胞词库拉下来，然后整理了接近5000万条的词库。包含了“腓骨钢板钛合金”，“肺吸虫抗体检测试剂”等等这样的词语，终于基本满足了领导的病态需求。搜狗细胞词库的转换代码我是参考的qinwf开发的cidian包,请移步其[个人主页](https://github.com/qinwf)查看具体实现原理。注意这个包不能再64位R上运行和安装，请用32位的运行。
 
-
+```{r}
+library(jiebaR)
+cutquery <- worker(type = "query",          # 定义切词模式，我经过多次尝试，觉得这种最合适
+                   user = "dict.txt",       # 个人词库
+                   stop_word = "stop.txt",  # 停止词词库
+                   encoding = "UTF-8")      # 文件编码
+# 分词函数
+fenci <- function(x){
+  # 将文字中的空白字符，数字，标点符号都替换为空格，替换为空格就是变成分隔符，
+  x <- gsub("[[:space:]]|[[:punct:]]|[[:xdigit:]]", " ", x) 
+  # 进行分词
+  cut_result <- segment(tolower(x), cutquery)
+  return(cut_result)
+}
+```
