@@ -32,10 +32,23 @@ con <- dbConnect(MySQL(),
                  dbname="********",         # 数据库名字
                  user="****",               # 数据库的用户名
                  password="*****")          # 数据库的密码
-dbSendQuery(con, 'SET NAMES gbk')            # 设定gbk编码，不然中文会乱码
+dbSendQuery(con, 'SET NAMES gbk')           # 设定gbk编码，不然中文会乱码
 # 从数据库中选取id,chinese_title,english_title,release_date
 nqi_std <- dbGetQuery(con, "SELECT id, chinese_title, english_title, release_date FROM nqi_std") 
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 当数据读入到我们的变量空间的时候我们要考虑2件事情一个是时间变量的处理，还有一个是文本的分词。时间变量的处理我打算是直接对数据进行个转换，将其变成一个\[1-2\]的数，距离现在越近数值越大。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当数据读入到我们的变量空间的时候我们要考虑2件事情一个是时间变量的处理，还有一个是文本的分词。时间变量的处理我打算是直接对数据进行个转换，将其变成一个\[1-2\]的数，距离现在越近数值越大。
 
+### 2.2 日期转数值
+```{r}
+library(data.table)
+nqi_std <- data.table(data)
+release_date <- unique(nqi_std[, release_date])
+date_to_num <- data.table(cbind(release_date, 
+                                num = seq(from = 1+1/length(release_date), to = 2, by = 1/length(release_date))))
+setkey(date_to_num, release_date)
+setkey(nqi_std, release_date)
+nqi_std <- merge(nqi_std, date_to_num)
+nqi_std <- nqi_std[, release_date := NULL]
+nqi_std <- nqi_std[, num := as.numeric(nqi_std[, num])]
+```
 
