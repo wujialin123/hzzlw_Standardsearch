@@ -77,3 +77,36 @@ fenci <- function(x){
   return(cut_result)
 }
 ```
+### 2.4 分词并计算TF_IDF值
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;直接进行TF_IDF值的计算并用权重加权。
+```{r}
+# 保留id和dateweight属性下进行分词
+nqi_std <- nqi_std[, lapply(.SD, fenci), by = .(id, dateweight)]
+nqi_std[, count2 := .N, by = id]            # 计算每个标准的词语数量
+nqi_std[, count3 := .N, by = .(id, text)]   # 计算每个词语在当前文档中的出现数量
+nqi_std <- unique(nqi_std)                  # 去重后才能计算词语在所有文档中出现的文档个数
+nqi_std[, count1 := .N, by = text]          # 计算词语在所有文档中出现的文档个数
+papercount <- nrow(data)                    # 计算文档个数
+nqi_std[, TF_IDF := count3/count2 * log(papercount/(count1+1) * dateweight)]
+# TF = count3/count2, IDF = log(papercount/(count1+1)
+```
+
+### 2.5 分词结果导出
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;将所有的分词结果按词语名导出到某个固定文件夹路径下。
+```{r}
+setkey(nqi_std, text)                       # 设定text主键，方便后续操作
+mykeyword <- unique(nqi_std[,text])         # 关键词去重
+Encoding(mykeyword) <- "UTF-8"              # 设置编码，否则无法写出中文文件
+setwd("D:/www/ElasticSearch/wordscore")     # 设定工作路径
+lf <- list.files(".", pattern = "txt")      # 查看所有txt文件
+file.remove(lf)                             # 删除原有文件
+# 写入文件函数
+writedata <- function(x){
+  file <- paste(x, ".txt", sep = "")        # 设定新产生的文件名
+  result <- nqi_std[list(x)]                # 筛选符合条件的数据
+  write.table(result[, text := NULL], file, quote = FALSE, row.names = FALSE, fileEncoding = "UTF-8",sep = "\t")  
+}
+# 写入文件
+lapply(mykeyword, writedata)
+rm(list=ls())                               # 释放内存
+```
