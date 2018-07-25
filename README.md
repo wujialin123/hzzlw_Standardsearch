@@ -36,19 +36,25 @@ dbSendQuery(con, 'SET NAMES gbk')           # 设定gbk编码，不然中文会�
 # 从数据库中选取id,chinese_title,english_title,release_date
 nqi_std <- dbGetQuery(con, "SELECT id, chinese_title, english_title, release_date FROM nqi_std") 
 ```
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当数据读入到我们的变量空间的时候我们要考虑2件事情一个是时间变量的处理，还有一个是文本的分词。时间变量的处理我打算是直接对数据进行个转换，将其变成一个\[1-2\]的数，距离现在越近数值越大。
 
 ### 2.2 日期转数值
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当数据读入到我们的变量空间的时候我们要考虑2件事情一个是时间变量的处理，还有一个是文本的分词。时间变量的处理我打算是直接对数据进行个转换，将其变成一个\[1-2\]的数，距离现在越近数值越大。
 ```{r}
-library(data.table)
-nqi_std <- data.table(data)
-release_date <- unique(nqi_std[, release_date])
+library(data.table)                         # 导入data.table包 R语言多线程数据清洗包
+nqi_std <- data.table(data)                 # 转换为data.table
+# 提取日期数据并进行升序排序，缺失值和日期较小的值会默认在前面sort函数是这样子的
+release_date <- sort(unique(nqi_std[, release_date]))
+# seq(...)这里是产生了等间隔的数值，分布为1-2
 date_to_num <- data.table(cbind(release_date, 
-                                num = seq(from = 1+1/length(release_date), to = 2, by = 1/length(release_date))))
-setkey(date_to_num, release_date)
-setkey(nqi_std, release_date)
-nqi_std <- merge(nqi_std, date_to_num)
-nqi_std <- nqi_std[, release_date := NULL]
-nqi_std <- nqi_std[, num := as.numeric(nqi_std[, num])]
+                                dateweight = seq(from = 1+1/length(release_date), to = 2, by = 1/length(release_date))))
+setkey(date_to_num, release_date)           # 设定主键release_date
+setkey(nqi_std, release_date)               # 设定主键release_date
+nqi_std <- merge(nqi_std, date_to_num)      # 主键相同的表才可以合并
+nqi_std <- nqi_std[, release_date := NULL]  # 日期数据已经没用了可以直接去除
+# 由于r语言cbind后产生的是是矩阵，要求的数据类型为一样，故dateweight变成了一堆字符串，这里需要进行转换
+nqi_std <- nqi_std[, dateweight := as.numeric(nqi_std[, dateweight])]
 ```
+### 2.3 定义一个分词器
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于某某领导的病态要求：我们这个一定要好好弄像什么凡尔滨对虾啊，秋叶葵啊，这些正常人都不知道的名词也要好好地给我分词分出来。没办法啊，我们只能去把整个搜狗细胞词库拉下来，然后整理了接近5000万条的词库。包含了“腓骨钢板钛合金”，“肺吸虫抗体检测试剂”等等这样的词语，终于基本满足了领导的病态需求。
+
 
