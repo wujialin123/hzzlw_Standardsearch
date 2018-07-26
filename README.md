@@ -189,7 +189,7 @@ def getsynonym(word):
         getdata = np.array(adm_fuzhu[:5])
     return getdata
 ```
-# 3.3 主模型
+### 3.3 主模型
 ```
 wordinput = parse.unquote(sys.argv[1]).encode("utf-8").decode("utf-8")  # 用户输入请求
 newword = gethtmltext(wordinput)                                        # 抓取分词结果
