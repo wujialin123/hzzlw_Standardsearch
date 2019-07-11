@@ -111,7 +111,7 @@ lapply(mykeyword, writedata)
 rm(list=ls())                               # 释放内存
 ```
 
-```{python}
+```python
 # -*- coding: utf-8 -*-                 # 设定utf-8编码
 import os                               # 修改工作路径
 import warnings                         # 屏蔽警告
@@ -130,7 +130,7 @@ os.chdir("D:/WWW/ElasticSearch")        # 修改工作路径
 ```
 ### 3.1 定义分词程序
 这里由于没空搭建分词环境就直接调用了某在线分词系统
-```
+```python
 def gethtmltext(word):
     # 抓取分词结果
     try: # 尝试调取 120.26.6.172的分词结果，如果失败了换个ip调取
@@ -153,7 +153,7 @@ def gethtmltext(word):
     return np.array(keyword)
 ```
 ### 3.2 定义同义词获取程序
-```
+```python
 def getsynonym(word):
     file = r'./search/' + word + ".txt"
     # 第一步尝试从本地读取
@@ -190,7 +190,7 @@ def getsynonym(word):
     return getdata
 ```
 ### 3.3 主模型
-```
+```python
 wordinput = parse.unquote(sys.argv[1]).encode("utf-8").decode("utf-8")  # 用户输入请求
 newword = gethtmltext(wordinput)                                        # 抓取分词结果
 data = pd.DataFrame(columns=['id', 'TF_IDF', 'name'])                   # 设定结果dataframe
