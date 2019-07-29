@@ -22,7 +22,7 @@ id|chinese_title|english_title|release_date
 
 ### 2.1 从数据库中导入数据
 
-```{r}
+``` r 
 rm(list = ls())                             # 清洗变量空间
 setwd("D:/www/ElasticSearch/fencimoxing")   # 设定工作路径
 library(RMySQL)                             # 数据库操作的一个包
@@ -41,7 +41,7 @@ data$text <- paste(data$chinese_title, data$english_title)
 
 ### 2.2 日期转数值
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当数据读入到我们的变量空间的时候我们要考虑2件事情一个是时间变量的处理，还有一个是文本的分词。时间变量的处理我打算是直接对数据进行个转换，将其变成一个\[1-2\]的数，距离现在越近数值越大。
-```{r}
+``` r 
 library(data.table)                         # 导入data.table包 R语言多线程数据清洗包
 nqi_std <- data.table(data)                 # 转换为data.table
 # 删除"chinese_title", "english_title"2列
@@ -62,7 +62,7 @@ nqi_std <- nqi_std[, dateweight := as.numeric(nqi_std[, dateweight])]
 ### 2.3 定义一个分词器
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于某某领导的病态要求：我们这个一定要好好弄像什么凡尔滨对虾啊，秋叶葵啊，这些正常人都不知道的名词也要好好地给我分词分出来。没办法啊，我们只能去把整个搜狗细胞词库拉下来，然后整理了接近5000万条的词库。包含了“腓骨钢板钛合金”，“肺吸虫抗体检测试剂”等等这样的词语，终于基本满足了领导的病态需求。搜狗细胞词库的转换代码我是参考的qinwf开发的cidian包,请移步其[个人主页](https://github.com/qinwf)查看具体实现原理。注意这个包不能再64位R上运行和安装，请用32位的运行。
 
-```{r}
+``` r 
 library(jiebaR)
 cutquery <- worker(type = "query",          # 定义切词模式，我经过多次尝试，觉得这种最合适
                    user = "dict.txt",       # 个人词库
@@ -79,7 +79,7 @@ fenci <- function(x){
 ```
 ### 2.4 分词并计算TF_IDF值
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;直接进行TF_IDF值的计算并用权重加权。
-```{r}
+``` r 
 # 保留id和dateweight属性下进行分词
 nqi_std <- nqi_std[, lapply(.SD, fenci), by = .(id, dateweight)]
 nqi_std[, count2 := .N, by = id]            # 计算每个标准的词语数量
@@ -93,7 +93,7 @@ nqi_std[, TF_IDF := count3/count2 * log(papercount/(count1+1) * dateweight)]
 
 ### 2.5 分词结果导出
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;将所有的分词结果按词语名导出到某个固定文件夹路径下。
-```{r}
+``` r 
 setkey(nqi_std, text)                       # 设定text主键，方便后续操作
 mykeyword <- unique(nqi_std[,text])         # 关键词去重
 Encoding(mykeyword) <- "UTF-8"              # 设置编码，否则无法写出中文文件
